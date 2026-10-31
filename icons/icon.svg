@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="48" y1="32" x2="464" y2="480" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#145A3E"/>
+      <stop offset="100%" stop-color="#0B3323"/>
+    </linearGradient>
+    <linearGradient id="topFace" x1="256" y1="108" x2="256" y2="252" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#9BE8C2"/>
+      <stop offset="100%" stop-color="#58BE8F"/>
+    </linearGradient>
+    <linearGradient id="leftFace" x1="128" y1="180" x2="256" y2="398" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#359A6E"/>
+      <stop offset="100%" stop-color="#1D6B4A"/>
+    </linearGradient>
+    <linearGradient id="rightFace" x1="384" y1="180" x2="256" y2="398" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#227954"/>
+      <stop offset="100%" stop-color="#134C34"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <!-- Isometric Cube -->
+  <polygon points="256,104 392,182 256,260 120,182" fill="url(#topFace)"/>
+  <polygon points="120,182 256,260 256,412 120,334" fill="url(#leftFace)"/>
+  <polygon points="392,182 256,260 256,412 392,334" fill="url(#rightFace)"/>
+  <!-- Crisp Edge Highlights -->
+  <polyline points="120,182 256,260 392,182" stroke="#CFF7E2" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <line x1="256" y1="260" x2="256" y2="412" stroke="#CFF7E2" stroke-width="6" stroke-linecap="round" opacity="0.45"/>
+  <!-- XOR Key Badge Overlay -->
+  <circle cx="364" cy="360" r="68" fill="#D5F7E5" stroke="#0B3323" stroke-width="12"/>
+  <circle cx="350" cy="348" r="18" stroke="#0F5238" stroke-width="10" fill="none"/>
+  <path d="M363 361 L392 390 M380 378 L390 368 M390 388 L400 378" stroke="#0F5238" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
