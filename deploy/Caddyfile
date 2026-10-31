@@ -1,0 +1,29 @@
+{
+	{$ACME_EMAIL_DIRECTIVE}
+}
+
+{$SITE_ADDRESS::80} {
+	{$TLS_DIRECTIVE}
+	root * /srv/mcxor
+	encode zstd gzip
+
+	# Ensure PWA Service Worker & HTML always validate latest updates
+	@sw_and_html {
+		path / /index.html /sw.js /manifest.webmanifest
+	}
+	header @sw_and_html Cache-Control "no-cache, must-revalidate"
+
+	# Cache static scripts, styles, and icons efficiently
+	@static_assets {
+		path /src/* /styles/* /icons/*
+	}
+	header @static_assets Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
+
+	# Security headers (compatible with Web Workers & Blob downloads)
+	header {
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	file_server
+}

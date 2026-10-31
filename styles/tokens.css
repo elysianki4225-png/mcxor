@@ -1,0 +1,155 @@
+/**
+ * Material Design 3 (Material You) Design Tokens
+ * Seed Palette: Emerald Moss (#146B48) + Warm Slate Neutral
+ * Complete Light & Dark Tonal Surface Hierarchy (Surface Container Lowest -> Highest)
+ */
+
+:root,
+:root[data-theme='light'] {
+  /* Primary */
+  --md-sys-color-primary: #146b48;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #a3f2c7;
+  --md-sys-color-on-primary-container: #002113;
+
+  /* Secondary */
+  --md-sys-color-secondary: #4d6356;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #cfe9d8;
+  --md-sys-color-on-secondary-container: #0a1f15;
+
+  /* Tertiary */
+  --md-sys-color-tertiary: #3c6472;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #bfe9f9;
+  --md-sys-color-on-tertiary-container: #001f28;
+
+  /* Error */
+  --md-sys-color-error: #ba1a1a;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #ffdad6;
+  --md-sys-color-on-error-container: #410002;
+
+  /* Warning & Success Semantic Extensions */
+  --md-sys-color-warning: #8b5000;
+  --md-sys-color-warning-container: #ffdcbe;
+  --md-sys-color-on-warning-container: #2c1600;
+
+  --md-sys-color-success: #116d45;
+  --md-sys-color-success-container: #bcf2d3;
+  --md-sys-color-on-success-container: #002111;
+
+  /* Surfaces (MD3 5-step Tonal Elevation) */
+  --md-sys-color-background: #f5fbf6;
+  --md-sys-color-on-background: #171d19;
+  --md-sys-color-surface: #f5fbf6;
+  --md-sys-color-surface-dim: #d6dbd6;
+  --md-sys-color-surface-bright: #f5fbf6;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #eff5f0;
+  --md-sys-color-surface-container: #e9efea;
+  --md-sys-color-surface-container-high: #e4eae5;
+  --md-sys-color-surface-container-highest: #dee4df;
+
+  --md-sys-color-on-surface: #171d19;
+  --md-sys-color-on-surface-variant: #404943;
+  --md-sys-color-outline: #707972;
+  --md-sys-color-outline-variant: #bfc9c1;
+
+  --md-sys-color-inverse-surface: #2c322e;
+  --md-sys-color-inverse-on-surface: #ecf2ed;
+  --md-sys-color-inverse-primary: #88d6ac;
+
+  --md-sys-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px 1px rgba(0, 0, 0, 0.04);
+  --md-sys-elevation-2: 0 2px 6px 2px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.05);
+  --md-sys-elevation-3: 0 8px 24px rgba(10, 31, 21, 0.12), 0 2px 6px rgba(10, 31, 21, 0.06);
+
+  --md-state-hover-opacity: 0.08;
+  --md-state-focus-opacity: 0.12;
+  --md-scrim: rgba(12, 22, 17, 0.48);
+}
+
+:root[data-theme='dark'] {
+  /* Primary */
+  --md-sys-color-primary: #88d6ac;
+  --md-sys-color-on-primary: #003823;
+  --md-sys-color-primary-container: #005234;
+  --md-sys-color-on-primary-container: #a3f2c7;
+
+  /* Secondary */
+  --md-sys-color-secondary: #b4ccbc;
+  --md-sys-color-on-secondary: #1f3529;
+  --md-sys-color-secondary-container: #364b3f;
+  --md-sys-color-on-secondary-container: #cfe9d8;
+
+  /* Tertiary */
+  --md-sys-color-tertiary: #a4cddc;
+  --md-sys-color-on-tertiary: #053542;
+  --md-sys-color-tertiary-container: #234c59;
+  --md-sys-color-on-tertiary-container: #bfe9f9;
+
+  /* Error */
+  --md-sys-color-error: #ffb4ab;
+  --md-sys-color-on-error: #690005;
+  --md-sys-color-error-container: #93000a;
+  --md-sys-color-on-error-container: #ffdad6;
+
+  /* Warning & Success Semantic Extensions */
+  --md-sys-color-warning: #ffb870;
+  --md-sys-color-warning-container: #4a2800;
+  --md-sys-color-on-warning-container: #ffdcbe;
+
+  --md-sys-color-success: #86d9ac;
+  --md-sys-color-success-container: #005232;
+  --md-sys-color-on-success-container: #bcf2d3;
+
+  /* Surfaces (MD3 Dark Tonal Hierarchy) */
+  --md-sys-color-background: #0e1511;
+  --md-sys-color-on-background: #dee4df;
+  --md-sys-color-surface: #0e1511;
+  --md-sys-color-surface-dim: #0e1511;
+  --md-sys-color-surface-bright: #343b36;
+  --md-sys-color-surface-container-lowest: #090f0c;
+  --md-sys-color-surface-container-low: #171d19;
+  --md-sys-color-surface-container: #1b211d;
+  --md-sys-color-surface-container-high: #252b27;
+  --md-sys-color-surface-container-highest: #303632;
+
+  --md-sys-color-on-surface: #dee4df;
+  --md-sys-color-on-surface-variant: #bfc9c1;
+  --md-sys-color-outline: #89938c;
+  --md-sys-color-outline-variant: #404943;
+
+  --md-sys-color-inverse-surface: #dee4df;
+  --md-sys-color-inverse-on-surface: #2c322e;
+  --md-sys-color-inverse-primary: #146b48;
+
+  --md-sys-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.32), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --md-sys-elevation-2: 0 4px 10px rgba(0, 0, 0, 0.38), 0 1px 3px rgba(0, 0, 0, 0.28);
+  --md-sys-elevation-3: 0 12px 32px rgba(0, 0, 0, 0.52), 0 4px 10px rgba(0, 0, 0, 0.32);
+
+  --md-state-hover-opacity: 0.1;
+  --md-state-focus-opacity: 0.14;
+  --md-scrim: rgba(0, 0, 0, 0.68);
+}
+
+:root {
+  /* Shape Scale */
+  --md-shape-xs: 6px;
+  --md-shape-sm: 10px;
+  --md-shape-md: 14px;
+  --md-shape-lg: 20px;
+  --md-shape-xl: 28px;
+  --md-shape-full: 9999px;
+
+  /* Typography */
+  --md-font-sans: 'Inter', 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei UI', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  --md-font-mono: 'JetBrains Mono', 'Cascadia Mono', 'SFMono-Regular', Consolas,
+    'Liberation Mono', Menlo, monospace;
+
+  /* Motion */
+  --md-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --md-duration-short: 160ms;
+  --md-duration-medium: 260ms;
+}

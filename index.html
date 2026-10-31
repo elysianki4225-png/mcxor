@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-theme-mode="auto">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>MCXOR · 网易我的世界存档加解密工具 (PWA)</title>
+    <meta
+      name="description"
+      content="基于 XOR-MC-Archive-Decrypt 的纯本地、零内存泄露、支持超大存档流式处理的我的世界网易版存档加密解密与完整性校验 PWA 工具"
+    />
+    <meta name="theme-color" content="#F5FBF6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="MCXOR" />
+
+    <link rel="icon" type="image/svg+xml" href="./icons/icon.svg" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+
+    <script>
+      (function () {
+        try {
+          var m = localStorage.getItem('mcxor-md3-theme') || 'auto';
+          var d =
+            m === 'dark' ||
+            (m === 'auto' &&
+              window.matchMedia &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var t = d ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', t);
+          document.documentElement.setAttribute('data-theme-mode', m);
+          document.documentElement.style.colorScheme = t;
+        } catch (e) {}
+      })();
+    </script>
+
+    <link rel="stylesheet" href="./styles/tokens.css" />
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+  <body>
+    <!-- Top App Bar -->
+    <header class="top-app-bar">
+      <div class="top-app-bar__inner">
+        <div class="brand">
+          <img src="./icons/icon.svg" alt="MCXOR 图标" class="brand__logo" width="40" height="40" />
+          <div class="brand__text">
+            <div class="brand__title-row">
+              <h1 class="brand__title">MCXOR 存档加解密</h1>
+              <span class="brand__badge" id="pwaStatusBadge">本地离线架构</span>
+            </div>
+            <p class="brand__subtitle">
+              基于 XOR-MC-Archive-Decrypt · 纯浏览器 Web Worker 流式处理 · 存档绝不上传服务器
+            </p>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button
+            type="button"
+            class="md-btn md-btn--tonal md-btn--sm"
+            id="btnInstallPwa"
+            hidden
+            title="安装为桌面或手机离线应用"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+            安装应用
+          </button>
+
+          <button
+            type="button"
+            class="md-btn md-btn--outlined md-btn--sm"
+            id="btnOpenDeployDialog"
+            title="查看自有服务器一键部署脚本 (支持自定义域名与 nip.io 免费证书)"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="7" rx="2"/><rect x="2" y="14" width="20" height="7" rx="2"/><circle cx="6" cy="6.5" r="1"/><circle cx="6" cy="17.5" r="1"/></svg>
+            自建部署脚本
+          </button>
+
+          <div class="memory-pill" title="实时 ObjectURL 与缓存句柄监控，防止大存档内存泄露">
+            <span class="memory-pill__dot"></span>
+            <span id="memoryStatsText">缓存句柄 0 · 0 B</span>
+            <button type="button" class="memory-pill__release" id="btnReleaseMemory">
+              释放内存
+            </button>
+          </div>
+
+          <div class="md-segmented" role="group" aria-label="界面主题切换">
+            <button
+              type="button"
+              class="md-segmented__btn"
+              data-theme-btn="auto"
+              aria-pressed="true"
+              title="跟随系统亮暗主题"
+            >
+              自动
+            </button>
+            <button
+              type="button"
+              class="md-segmented__btn"
+              data-theme-btn="light"
+              aria-pressed="false"
+              title="浅色模式"
+            >
+              浅色
+            </button>
+            <button
+              type="button"
+              class="md-segmented__btn"
+              data-theme-btn="dark"
+              aria-pressed="false"
+              title="深色模式"
+            >
+              深色
+            </button>
+          </div>
+
+          <a
+            href="https://github.com/elysianki4225-png/mcxor"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="md-icon-btn"
+            aria-label="访问 GitHub 仓库"
+            title="GitHub 开源仓库"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.38-3.88-1.38-.52-1.33-1.28-1.68-1.28-1.68-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.16-1.18 3.16-1.18.63 1.59.24 2.76.12 3.05.74.81 1.18 1.83 1.18 3.09 0 4.42-2.7 5.39-5.27 5.68.42.36.79 1.06.79 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="app-main">
+      <div class="workspace-grid">
+        <!-- Left Column: Input, World Summary, Mode Config, 3-Stage Progress -->
+        <div class="workspace-col">
+          <!-- Card 1: Multi-Format Archive Dropzone -->
+          <section class="md-card" aria-labelledby="uploadTitle">
+            <div class="md-card__header">
+              <div class="md-card__title-group">
+                <div class="md-card__icon md-card__icon--primary">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <div>
+                  <h2 class="md-card__title" id="uploadTitle">1. 导入网易或基岩版存档</h2>
+                  <p class="md-card__subtitle">
+                    支持多种格式读取与中文路径自动识别，大文件采用随机切片流式解析不占内存
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="dropzone" id="dropzone" tabindex="0" role="region" aria-label="拖拽存档上传区域">
+              <div class="dropzone__emblem">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M3 15h6"/><path d="M6 12v6"/></svg>
+              </div>
+              <p class="dropzone__headline">将存档压缩包或整个存档文件夹拖拽至此处</p>
+              <p class="dropzone__hint">
+                无需手动提取 <code>db</code> 目录，直接上传完整存档即可自动定位 <code>level.dat</code> 与 LevelDB 数据库；处理超大存档时推荐打包选择“仅存储”以获得秒级体验。
+              </p>
+
+              <div class="dropzone__actions">
+                <button type="button" class="md-btn md-btn--filled" id="btnPickArchive">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+                  选择存档包 (.zip / .mcworld)
+                </button>
+                <button type="button" class="md-btn md-btn--tonal" id="btnPickFolder">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  选择存档文件夹
+                </button>
+                <button type="button" class="md-btn md-btn--outlined md-btn--sm" id="btnPickFiles">
+                  散装文件检测
+                </button>
+              </div>
+
+              <div class="format-chips">
+                <span class="format-chip">.zip 压缩包</span>
+                <span class="format-chip">.mcworld 世界包</span>
+                <span class="format-chip">.mctemplate 世界模板</span>
+                <span class="format-chip">.mcaddon 附加包</span>
+                <span class="format-chip">存档文件夹 (Directory)</span>
+                <span class="format-chip">GBK / UTF-8 中文兼容</span>
+              </div>
+
+              <!-- Hidden File Inputs -->
+              <input
+                type="file"
+                id="inputArchiveFile"
+                accept=".zip,.mcworld,.mctemplate,.mcaddon,.mcpack,application/zip"
+                hidden
+              />
+              <input type="file" id="inputFolder" webkitdirectory directory multiple hidden />
+              <input type="file" id="inputLooseFiles" multiple hidden />
+            </div>
+
+            <div class="demo-bar">
+              <span>手边暂时没有加密存档？可一键生成标准网易加密测试包体验完整流程：</span>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                <button type="button" class="md-btn md-btn--tonal md-btn--sm" id="btnLoadEncryptedDemo">
+                  加载加密示例存档
+                </button>
+                <button type="button" class="md-btn md-btn--outlined md-btn--sm" id="btnLoadPlainDemo">
+                  加载明文示例存档
+                </button>
+              </div>
+            </div>
+
+            <!-- World Overview Banner (shown once archive analyzed) -->
+            <div id="worldSummaryContainer" style="margin-top: 16px" hidden>
+              <div class="world-summary">
+                <img
+                  id="worldThumbImg"
+                  class="world-summary__thumb"
+                  src="./icons/icon.svg"
+                  alt="存档封面"
+                />
+                <div class="world-summary__body">
+                  <h3 class="world-summary__title" id="worldTitleText">-</h3>
+                  <div class="world-summary__meta" id="worldMetaText"></div>
+                </div>
+                <button
+                  type="button"
+                  class="md-btn md-btn--outlined md-btn--sm"
+                  id="btnResetSession"
+                  title="关闭当前存档并立即释放相关缓存"
+                >
+                  清空重置
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Card 2: Operation Mode & Options -->
+          <section class="md-card" aria-labelledby="modeTitle">
+            <div class="md-card__header">
+              <div class="md-card__title-group">
+                <div class="md-card__icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+                </div>
+                <div>
+                  <h2 class="md-card__title" id="modeTitle">2. 选择加解密模式与参数</h2>
+                  <p class="md-card__subtitle">
+                    完整支持原版四大操作模式：被动默认密钥与主动 64-bit 自适应/自定义密钥
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="op-grid" role="radiogroup" aria-label="加解密操作类型">
+              <button
+                type="button"
+                class="op-tile is-selected"
+                data-op="active_decrypt"
+                aria-checked="true"
+                role="radio"
+              >
+                <div class="op-tile__top">
+                  <span class="op-tile__name">主动解密 (推荐)</span>
+                  <span class="op-tile__tag">自适应 / 自定义</span>
+                </div>
+                <span class="op-tile__desc">
+                  自动从 CURRENT ⊕ MANIFEST 或 .ldb 魔数推导 64-bit 密钥，通吃资源中心与常规存档
+                </span>
+              </button>
+
+              <button
+                type="button"
+                class="op-tile"
+                data-op="passive_decrypt"
+                aria-checked="false"
+                role="radio"
+              >
+                <div class="op-tile__top">
+                  <span class="op-tile__name">被动解密</span>
+                  <span class="op-tile__tag">默认密钥</span>
+                </div>
+                <span class="op-tile__desc">
+                  使用网易客户端内置固定密钥 <code>88329851</code> (0x3838333239383531) 解密本地存档
+                </span>
+              </button>
+
+              <button
+                type="button"
+                class="op-tile"
+                data-op="passive_encrypt"
+                aria-checked="false"
+                role="radio"
+              >
+                <div class="op-tile__top">
+                  <span class="op-tile__name">被动加密</span>
+                  <span class="op-tile__tag">默认密钥</span>
+                </div>
+                <span class="op-tile__desc">
+                  使用网易内置固定密钥加密国际版明文存档并写入 <code>0x801D3001</code> 魔数头
+                </span>
+              </button>
+
+              <button
+                type="button"
+                class="op-tile"
+                data-op="active_encrypt"
+                aria-checked="false"
+                role="radio"
+              >
+                <div class="op-tile__top">
+                  <span class="op-tile__name">主动加密</span>
+                  <span class="op-tile__tag">64-bit 自定义</span>
+                </div>
+                <span class="op-tile__desc">
+                  使用自定义或原推导 64-bit 密钥加密存档（资源中心含 netease_config 地图回传必备）
+                </span>
+              </button>
+            </div>
+
+            <!-- Custom Key Input Box (Shown in Active Decrypt & Active Encrypt) -->
+            <div class="key-input-box" id="customKeyBox">
+              <div class="key-input-box__header">
+                <label for="customKeyInput" class="key-input-box__label" id="customKeyLabel">
+                  自定义 64-bit 密钥（留空则自动推导密钥）
+                </label>
+                <div class="md-segmented" role="group" aria-label="密钥输入编码">
+                  <button
+                    type="button"
+                    class="md-segmented__btn is-active"
+                    data-keyfmt="hex"
+                    aria-pressed="true"
+                  >
+                    HEX 十六进制
+                  </button>
+                  <button
+                    type="button"
+                    class="md-segmented__btn"
+                    data-keyfmt="ascii"
+                    aria-pressed="false"
+                  >
+                    ASCII 字符
+                  </button>
+                </div>
+              </div>
+
+              <div class="key-input-row">
+                <input
+                  type="text"
+                  id="customKeyInput"
+                  class="md-input"
+                  placeholder="留空自动推导；或输入如 0x4D43584F52373737"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+                <button type="button" class="md-btn md-btn--tonal md-btn--sm" id="btnFillInferredKey">
+                  填入已推导密钥
+                </button>
+                <button type="button" class="md-btn md-btn--outlined md-btn--sm" id="btnRandomKey">
+                  随机生成
+                </button>
+              </div>
+              <div class="key-input-feedback" id="customKeyFeedback">
+                提示：大于 64-bit 将按规范自动截取后 64-bit，不足 64-bit 将补零对齐为 8 字节。
+              </div>
+            </div>
+
+            <!-- Export & Compatibility Options -->
+            <div class="options-list">
+              <div class="option-row">
+                <div class="option-row__text">
+                  <div class="option-row__title">导出存档封装格式</div>
+                  <div class="option-row__hint">
+                    <code>.mcworld</code> 会自动规范化根目录，双击即可直接导入国际版我的世界
+                  </div>
+                </div>
+                <div class="md-segmented" role="group" aria-label="输出文件格式">
+                  <button
+                    type="button"
+                    class="md-segmented__btn is-active"
+                    data-outfmt="mcworld"
+                    aria-pressed="true"
+                  >
+                    .mcworld
+                  </button>
+                  <button
+                    type="button"
+                    class="md-segmented__btn"
+                    data-outfmt="zip"
+                    aria-pressed="false"
+                  >
+                    .zip
+                  </button>
+                </div>
+              </div>
+
+              <div class="option-row">
+                <div class="option-row__text">
+                  <div class="option-row__title">移除 netease_config 文件夹</div>
+                  <div class="option-row__hint">
+                    资源中心解密地图若保留该目录可能导致国际版导入报错；若需导回网易版请勿勾选
+                  </div>
+                </div>
+                <label class="md-switch" aria-label="移除 netease_config 文件夹">
+                  <input type="checkbox" id="chkStripNetease" />
+                  <span class="md-switch__slider"></span>
+                </label>
+              </div>
+
+              <div class="option-row">
+                <div class="option-row__text">
+                  <div class="option-row__title">压缩修改后的数据库文件 (DEFLATE)</div>
+                  <div class="option-row__hint">
+                    默认关闭（采用极速仅存储模式，超大存档打包快 10 倍且零额外内存开销）
+                  </div>
+                </div>
+                <label class="md-switch" aria-label="启用 DEFLATE 压缩">
+                  <input type="checkbox" id="chkCompressDb" />
+                  <span class="md-switch__slider"></span>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <!-- Card 3: Action Execution & 3-Stage Progress Bars -->
+          <section class="md-card" aria-labelledby="progressTitle">
+            <div class="md-card__header">
+              <div class="md-card__title-group">
+                <div class="md-card__icon md-card__icon--primary">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </div>
+                <div>
+                  <h2 class="md-card__title" id="progressTitle">3. 执行处理与三阶段实时进度</h2>
+                  <p class="md-card__subtitle">
+                    独立监控分片上传读取、核心文件异或加解密、零拷贝流式打包下载全过程
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="action-bar">
+              <button
+                type="button"
+                class="md-btn md-btn--filled md-btn--lg"
+                id="btnStartProcess"
+                disabled
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>
+                <span id="btnStartProcessLabel">开始解密存档</span>
+              </button>
+
+              <button
+                type="button"
+                class="md-btn md-btn--danger"
+                id="btnCancelTask"
+                hidden
+              >
+                中止当前任务
+              </button>
+
+              <a
+                id="btnDownloadOutput"
+                class="md-btn md-btn--tonal md-btn--lg"
+                href="#"
+                download=""
+                hidden
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span id="btnDownloadLabel">下载处理后存档</span>
+              </a>
+            </div>
+
+            <!-- 3 Distinct Progress Bars -->
+            <div class="progress-stack">
+              <!-- Bar 1: Upload & Read -->
+              <div class="progress-item" id="prgCardUpload">
+                <div class="progress-item__head">
+                  <span class="progress-item__title">
+                    ① 上传与存档解析进度
+                  </span>
+                  <span class="progress-item__pct" id="prgUploadPct">0%</span>
+                </div>
+                <div
+                  class="md-progress-track"
+                  role="progressbar"
+                  aria-label="上传与存档解析进度"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow="0"
+                  id="prgUploadBarAria"
+                >
+                  <div class="md-progress-fill" id="prgUploadFill"></div>
+                </div>
+                <div class="progress-item__foot">
+                  <span class="progress-item__detail" id="prgUploadDetail">等待导入存档文件...</span>
+                  <span class="mono" id="prgUploadMetric">0 B / 0 B</span>
+                </div>
+              </div>
+
+              <!-- Bar 2: File Decrypt / Encrypt -->
+              <div class="progress-item" id="prgCardCrypto">
+                <div class="progress-item__head">
+                  <span class="progress-item__title">
+                    ② 数据库文件加解密进度
+                  </span>
+                  <span class="progress-item__pct" id="prgCryptoPct">0%</span>
+                </div>
+                <div
+                  class="md-progress-track"
+                  role="progressbar"
+                  aria-label="数据库文件加解密进度"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow="0"
+                  id="prgCryptoBarAria"
+                >
+                  <div class="md-progress-fill" id="prgCryptoFill"></div>
+                </div>
+                <div class="progress-item__foot">
+                  <span class="progress-item__detail" id="prgCryptoDetail">等待开始加解密计算...</span>
+                  <span class="mono" id="prgCryptoMetric">0 / 0 文件</span>
+                </div>
+              </div>
+
+              <!-- Bar 3: Packaging & Download -->
+              <div class="progress-item" id="prgCardDownload">
+                <div class="progress-item__head">
+                  <span class="progress-item__title">
+                    ③ 归档打包与下载准备进度
+                  </span>
+                  <span class="progress-item__pct" id="prgDownloadPct">0%</span>
+                </div>
+                <div
+                  class="md-progress-track"
+                  role="progressbar"
+                  aria-label="归档打包与下载准备进度"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow="0"
+                  id="prgDownloadBarAria"
+                >
+                  <div class="md-progress-fill" id="prgDownloadFill"></div>
+                </div>
+                <div class="progress-item__foot">
+                  <span class="progress-item__detail" id="prgDownloadDetail">等待打包输出流...</span>
+                  <span class="mono" id="prgDownloadMetric">0 / 0 项</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Right Column: Key Inspector, Save Integrity Verification, DB File Tree & Console -->
+        <div class="workspace-col">
+          <!-- Card 4: Prominent 64-bit XOR Key Inspector -->
+          <section class="md-card md-card--tonal" aria-labelledby="keyCardTitle">
+            <div class="md-card__header">
+              <div class="md-card__title-group">
+                <div class="md-card__icon md-card__icon--primary">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                </div>
+                <div>
+                  <h2 class="md-card__title" id="keyCardTitle">存档密钥检视器 (64-bit XOR Key)</h2>
+                  <p class="md-card__subtitle">
+                    实时显示自动推导或当前生效的 8 字节循环异或密钥，支持一键复制与回填
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="key-display">
+              <div class="key-display__source" id="keySourceBadge">
+                当前展示：网易内置被动默认密钥 ("88329851")
+              </div>
+              <div class="key-display__hex-row">
+                <div class="key-display__hex" id="keyHexValue">0x3838333239383531</div>
+                <button type="button" class="md-btn md-btn--filled md-btn--sm" id="btnCopyHexKey">
+                  复制十六进制
+                </button>
+              </div>
+
+              <div class="byte-chips" id="keyByteChips" aria-label="8字节密钥分布">
+                <!-- Populated dynamically -->
+              </div>
+
+              <div class="key-meta-grid">
+                <div class="key-meta-cell">
+                  <div class="key-meta-cell__k">ASCII 字符预览</div>
+                  <div class="key-meta-cell__v" id="keyAsciiValue">88329851</div>
+                </div>
+                <div class="key-meta-cell">
+                  <div class="key-meta-cell__k">网易加密魔数头</div>
+                  <div class="key-meta-cell__v">0x801D3001 (4 Bytes)</div>
+                </div>
+              </div>
+
+              <div class="key-display__actions">
+                <button type="button" class="md-btn md-btn--tonal md-btn--sm" id="btnCopyAsciiKey">
+                  复制 ASCII
+                </button>
+                <button type="button" class="md-btn md-btn--outlined md-btn--sm" id="btnUseKeyForEncrypt">
+                  将此密钥用于主动加密
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Card 5: Save Integrity & LevelDB Magic Verification Report -->
+          <section class="md-card" aria-labelledby="integrityTitle">
+            <div class="md-card__header">
+              <div class="md-card__title-group">
+                <div class="md-card__icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                </div>
+                <div>
+                  <h2 class="md-card__title" id="integrityTitle">存档完整性与魔数合理性校验</h2>
+                  <p class="md-card__subtitle">
+                    校验 level.dat、CURRENT、MANIFEST 及全部 .ldb 尾部 64-bit 魔数
+                  </p>
+                </div>
+              </div>
+              <span class="status-pill status-pill--neutral" id="integrityOverallPill">
+                待检测
+              </span>
+            </div>
+
+            <div id="postAvalBanner" style="margin-bottom: 12px" hidden></div>
+
+            <div class="check-list" id="integrityCheckList">
+              <div class="empty-placeholder">
+                导入存档后将自动执行结构完整性核验、CRC32 校验与 LevelDB 表魔数诊断
+              </div>
+            </div>
+          </section>
+
+          <!-- Card 6: DB File Inspector & Execution Log -->
+          <section class="md-card" aria-labelledby="inspectorTitle">
+            <div class="md-card__header">
+              <div class="md-card__title-group">
+                <div class="md-card__icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                </div>
+                <div>
+                  <h2 class="md-card__title" id="inspectorTitle">数据库明细与执行日志</h2>
+                  <p class="md-card__subtitle">查看 db/ 核心文件加密状态与实时处理流水</p>
+                </div>
+              </div>
+
+              <div class="md-segmented" role="tablist" aria-label="明细面板切换">
+                <button
+                  type="button"
+                  class="md-segmented__btn is-active"
+                  data-tab="files"
+                  role="tab"
+                  aria-selected="true"
+                >
+                  数据库文件
+                </button>
+                <button
+                  type="button"
+                  class="md-segmented__btn"
+                  data-tab="logs"
+                  role="tab"
+                  aria-selected="false"
+                >
+                  运行日志
+                </button>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="tabPanelFiles">
+              <div class="db-list" id="dbFilesContainer">
+                <div class="empty-placeholder">导入存档后在此列出 db/ 目录核心文件与魔数状态</div>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="tabPanelLogs" hidden>
+              <div class="console-box" id="consoleContainer">
+                <p class="log-line">[就绪] MCXOR 存档加解密引擎已启动 (Web Worker 独立线程模式)</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="app-footer__inner">
+        <div>
+          核心加解密算法致谢
+          <a href="https://github.com/HTMonkeyG/XOR-MC-Archive-Decrypt" target="_blank" rel="noopener noreferrer">
+            HTMonkeyG/XOR-MC-Archive-Decrypt
+          </a>
+          (MIT) · 纯前端本地处理，不收集或上传任何存档数据
+        </div>
+        <div>
+          在线体验：
+          <a href="https://elysianki4225-png.github.io/mcxor/" target="_blank" rel="noopener noreferrer">
+            elysianki4225-png.github.io/mcxor
+          </a>
+          ·
+          <a href="https://github.com/elysianki4225-png/mcxor" target="_blank" rel="noopener noreferrer">
+            GitHub 源码与一键部署
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Self-Host One-Click Deployment Script Modal Dialog -->
+    <div class="md-dialog-backdrop" id="deployDialogBackdrop" hidden>
+      <div
+        class="md-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="deployDialogTitle"
+      >
+        <div class="md-card__header">
+          <div>
+            <h2 class="md-card__title" id="deployDialogTitle">
+              自建服务器一键部署脚本 (支持自定义域名 / 无域名 nip.io 证书)
+            </h2>
+            <p class="md-card__subtitle">
+              内置 Caddy 2 自动 ACME (Let's Encrypt + ZeroSSL 双重自动签发)，确保 HTTPS 环境完整启用 PWA 离线能力
+            </p>
+          </div>
+          <button type="button" class="md-icon-btn" id="btnCloseDeployDialog" aria-label="关闭弹窗">
+            ✕
+          </button>
+        </div>
+
+        <div class="option-row" style="margin-bottom: 12px">
+          <div class="option-row__text">
+            <div class="option-row__title">1. 无域名一键部署（自动获取公网 IP 并签发 <code>&lt;IP&gt;.nip.io</code> HTTPS 证书）</div>
+            <div class="option-row__hint">适合只有云服务器公网 IP、没有购买域名的场景（需开放 80 / 443 端口）</div>
+          </div>
+        </div>
+        <div class="code-block" id="cmdNipDeploy">curl -fsSL https://raw.githubusercontent.com/elysianki4225-png/mcxor/main/deploy.sh | sudo bash -s -- --nip</div>
+        <button type="button" class="md-btn md-btn--tonal md-btn--sm" data-copy-target="cmdNipDeploy">
+          复制无域名 nip.io 部署命令
+        </button>
+
+        <div class="option-row" style="margin-top: 16px; margin-bottom: 12px">
+          <div class="option-row__text">
+            <div class="option-row__title">2. 自定义域名一键部署（自动签发域名 TLS 证书）</div>
+            <div class="option-row__hint">请先将域名 A 记录解析至服务器 IP，替换下方 <code>mc.example.com</code></div>
+          </div>
+        </div>
+        <div class="code-block" id="cmdDomainDeploy">curl -fsSL https://raw.githubusercontent.com/elysianki4225-png/mcxor/main/deploy.sh | sudo bash -s -- --domain mc.example.com</div>
+        <button type="button" class="md-btn md-btn--tonal md-btn--sm" data-copy-target="cmdDomainDeploy">
+          复制自定义域名部署命令
+        </button>
+
+        <div class="option-row" style="margin-top: 16px; margin-bottom: 12px">
+          <div class="option-row__text">
+            <div class="option-row__title">3. Docker Compose 容器化一键部署</div>
+            <div class="option-row__hint">仓库内已提供 Dockerfile 与 docker-compose.yml，支持环境变量指定域名或 nip.io</div>
+          </div>
+        </div>
+        <div class="code-block" id="cmdDockerDeploy">git clone https://github.com/elysianki4225-png/mcxor.git && cd mcxor && sudo ./deploy.sh --mode docker --nip</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px">
+          <button type="button" class="md-btn md-btn--tonal md-btn--sm" data-copy-target="cmdDockerDeploy">
+            复制 Docker 部署命令
+          </button>
+          <button type="button" class="md-btn md-btn--filled md-btn--sm" id="btnDoneDeployDialog">
+            完成
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MD3 Snackbar -->
+    <div class="snackbar" id="snackbar" role="status" aria-live="polite"></div>
+
+    <script type="module" src="./src/app/main.js"></script>
+  </body>
+</html>

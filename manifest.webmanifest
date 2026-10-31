@@ -1,0 +1,47 @@
+{
+  "name": "MCXOR · 网易我的世界存档加解密工具",
+  "short_name": "MCXOR 存档解密",
+  "description": "基于 XOR-MC-Archive-Decrypt 的纯本地、零内存泄露、支持大存档流式处理的网易我的世界存档加密与解密 PWA 工具",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0E1511",
+  "theme_color": "#146B48",
+  "categories": ["utilities", "games", "developer tools"],
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "./",
+      "accept": {
+        "application/zip": [".zip", ".mcworld", ".mctemplate", ".mcaddon", ".mcpack"]
+      }
+    }
+  ]
+}

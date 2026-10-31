@@ -1,0 +1,13 @@
+{
+  "name": "mcxor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "基于 XOR-MC-Archive-Decrypt 的响应式 Material Design 3 网易我的世界存档加解密 PWA 网站",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "test": "node --test tests/engine.test.mjs"
+  },
+  "license": "MIT"
+}
